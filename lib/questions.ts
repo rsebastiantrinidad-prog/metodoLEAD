@@ -4,10 +4,7 @@ export interface QuestionBlock {
   id: CategoryId;
   titulo: string;
   objetivo: string;
-  escala: {
-    min: string;
-    max: string;
-  };
+  escala: string[];
   preguntas: string[];
 }
 
@@ -16,7 +13,13 @@ export const leadQuestions: QuestionBlock[] = [
     id: "L",
     titulo: "Liderazgo (Criterio y Decisión)",
     objetivo: "Evaluar si el líder actúa como cuello de botella o como facilitador estratégico.",
-    escala: { min: "Totalmente en desacuerdo", max: "Totalmente de acuerdo" },
+    escala: [
+      "Totalmente en desacuerdo",
+      "Parcialmente en desacuerdo",
+      "Ni de acuerdo ni en desacuerdo",
+      "Parcialmente de acuerdo",
+      "Totalmente de acuerdo"
+    ],
     preguntas: [
       "Mi equipo avanza de forma autónoma sin que yo sea el centro de todas las decisiones.",
       "Delegar me genera tranquilidad porque confío en el criterio de mi equipo.",
@@ -32,7 +35,13 @@ export const leadQuestions: QuestionBlock[] = [
     id: "E",
     titulo: "Estructura (Roles y Procesos)",
     objetivo: "Detectar confusión, retrabajo y desorden en la ejecución.",
-    escala: { min: "Caos total", max: "Orden absoluto" },
+    escala: [
+      "Caos total",
+      "Generalmente desordenado",
+      "Orden parcial o frágil",
+      "Principalmente organizado",
+      "Orden absoluto"
+    ],
     preguntas: [
       "Cada integrante conoce sus responsabilidades específicas y nadie se pisa las tareas con otro.",
       "Contamos con un mapa de roles actualizado que es consultado regularmente por el equipo.",
@@ -48,7 +57,13 @@ export const leadQuestions: QuestionBlock[] = [
     id: "A",
     titulo: "Alineación (Prioridades y Objetivos)",
     objetivo: "Validar que el esfuerzo se traduzca en resultados medibles y no solo en actividad.",
-    escala: { min: "Nada alineados", max: "Totalmente alineados" },
+    escala: [
+      "Nada alineados",
+      "Poco alineados",
+      "Medianamente alineados",
+      "Bastante alineados",
+      "Totalmente alineados"
+    ],
     preguntas: [
       "Las 3 prioridades estratégicas del mes son conocidas y compartidas por todo el equipo.",
       "El equipo sabe decir 'no' a las urgencias que no alinean con nuestros objetivos críticos.",
@@ -64,7 +79,13 @@ export const leadQuestions: QuestionBlock[] = [
     id: "D",
     titulo: "Desempeño (Métricas y Hábitos)",
     objetivo: "Evaluar la capacidad de medir y sostener el éxito de forma autónoma.",
-    escala: { min: "No medimos", max: "Medimos y ajustamos" },
+    escala: [
+      "No medimos nada",
+      "Medimos rara vez o sin método",
+      "Medimos algunas cosas (Control parcial)",
+      "Medimos y evaluamos regularmente",
+      "Medimos y ajustamos constantemente"
+    ],
     preguntas: [
       "Contamos con indicadores simples que muestran el estado de salud de la operación semanalmente.",
       "Los resultados de mi equipo son predecibles; no dependemos de 'golpes de suerte' o esfuerzos heroicos.",

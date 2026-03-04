@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { leadQuestions, CategoryId } from '@/lib/questions';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, PolarRadiusAxis } from 'recharts';
 import { ChevronRight, ChevronLeft, Send, CheckCircle2 } from 'lucide-react';
+import { getInterpretation } from '@/lib/interpretations';
 
 export default function DiagnosticoPage() {
   const [step, setStep] = useState(0); // 0 a 31 (las 32 preguntas)
@@ -41,64 +42,102 @@ export default function DiagnosticoPage() {
 
   if (finalizado) {
     return (
-      <div className="max-w-4xl mx-auto p-8 text-center">
-        <h2 className="text-3xl font-bold mb-6">Tu Diagnóstico LEAD®</h2>
-        
-        <div className="h-[400px] w-full mb-10">
+      <div className="max-w-4xl mx-auto p-8 text-center bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800">
+        <h2 className="text-4xl font-extrabold mb-8 text-slate-900 dark:text-white items-center flex justify-center gap-3">
+          <CheckCircle2 className="text-green-500" size={36} />
+          Tu Diagnóstico Estratégico LEAD®
+        </h2>
+
+        <div className="h-[450px] w-full mb-10 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 overflow-hidden">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={dataGrafico}>
-              <PolarGrid />
-              <PolarAngleAxis dataKey="subject" />
-              <Radar name="LEAD" dataKey="A" stroke="#2563eb" fill="#3b82f6" fillOpacity={0.6} />
+            <RadarChart cx="50%" cy="50%" outerRadius="75%" data={dataGrafico}>
+              <PolarGrid stroke="#cbd5e1" strokeDasharray="3 3" />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: 'currentColor', fontWeight: 800, fontSize: 16 }} className="text-slate-900 dark:text-slate-100" />
+              <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
+              <Radar name="LEAD" dataKey="A" stroke="#2563eb" strokeWidth={3} fill="#3b82f6" fillOpacity={0.6} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="grid gap-4 text-left">
-          {/* Aquí puedes mapear la interpretación basada en los promedios del PDF */}
-          <p className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <strong>Resultado:</strong> Has completado el diagnóstico. Tu pilar más fuerte es el que tiene el puntaje más alto en el gráfico.
-          </p>
+        <div className="grid gap-6 text-left md:grid-cols-2">
+          {dataGrafico.map((item) => {
+            const id = item.subject.charAt(0);
+            const interpretacion = getInterpretation(id, item.A);
+            return (
+              <div key={item.subject} className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{item.subject}</h3>
+                  <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-bold px-3 py-1 rounded-full text-sm">
+                    {item.A.toFixed(1)} / 5.0
+                  </span>
+                </div>
+                {interpretacion && (
+                  <div className="space-y-4 mt-4">
+                    <div className="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide mb-2">
+                        {interpretacion.title}
+                      </p>
+                      <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                        {interpretacion.titleDesc}
+                      </p>
+                    </div>
+                    <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/30">
+                      <p className="text-sm font-bold text-red-700 dark:text-red-400 mb-2">
+                        Diagnóstico Preliminar: <span className="font-semibold">{interpretacion.diag}</span>
+                      </p>
+                      <p className="text-sm text-red-600 dark:text-red-300 leading-relaxed font-medium">
+                        {interpretacion.diagDesc}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
   }
 
   return (
-    <main className="max-w-2xl mx-auto pt-20 px-6">
+    <main className="max-w-2xl mx-auto pt-20 px-6 pb-20">
       <div className="mb-8">
-        <span className="text-blue-600 font-bold tracking-widest uppercase text-sm">
+        <span className="text-blue-700 dark:text-blue-400 font-extrabold tracking-widest uppercase text-sm">
           Bloque {currentBlock.id}: {currentBlock.titulo}
         </span>
-        <div className="w-full bg-slate-200 h-2 mt-2 rounded-full overflow-hidden">
-          <div 
-            className="bg-blue-600 h-full transition-all duration-300" 
+        <div className="w-full bg-slate-200 dark:bg-slate-700 h-3 mt-3 rounded-full overflow-hidden">
+          <div
+            className="bg-blue-600 dark:bg-blue-500 h-full transition-all duration-500 ease-out"
             style={{ width: `${((step + 1) / 32) * 100}%` }}
           />
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold text-slate-800 mb-8 leading-snug">
-        {currentQuestion}
-      </h2>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-700 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white leading-tight">
+          {currentQuestion}
+        </h2>
+      </div>
 
-      <div className="grid gap-3">
-        {[1, 2, 3, 4, 5].map((valor) => (
+      <div className="grid gap-4 mt-6">
+        {[1, 2, 3, 4, 5].map((valor, index) => (
           <button
             key={valor}
             onClick={() => handleAnswer(valor)}
-            className="flex items-center justify-between p-4 border rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all text-left group"
+            className="flex items-center justify-between p-5 border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700/50 hover:border-blue-500 dark:hover:border-blue-400 transition-all text-left group bg-white dark:bg-slate-800 shadow-sm hover:shadow-md"
           >
-            <span className="font-medium text-slate-700">
-              {valor === 1 ? currentBlock.escala.min : valor === 5 ? currentBlock.escala.max : `Nivel ${valor}`}
+            <span className="font-semibold text-slate-800 dark:text-slate-100 text-lg group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              {currentBlock.escala[index]}
             </span>
-            <ChevronRight className="text-slate-300 group-hover:text-blue-500" size={20} />
+            <div className="bg-slate-100 dark:bg-slate-700 p-2 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">
+              <ChevronRight className="text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" size={20} />
+            </div>
           </button>
         ))}
       </div>
 
-      <div className="mt-8 text-slate-400 text-sm text-center">
-        Pregunta {step + 1} de 32
+      <div className="mt-10 text-slate-500 dark:text-slate-400 font-medium text-center bg-slate-100 dark:bg-slate-800 py-3 rounded-full mx-auto max-w-xs">
+        Pregunta <span className="text-slate-900 dark:text-white font-bold">{step + 1}</span> de 32
       </div>
     </main>
   );
