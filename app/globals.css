@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark Navy Neutral Background Main Theme */
+  --background: #0F172A;
+  /* Slate 900 */
+  --foreground: #F1F5F9;
+  /* Slate 100 */
 }
 
 @theme inline {
@@ -11,17 +14,31 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
+  /* Official Brand Colors - Dark Mode Optimized */
   --color-lead-navy: #0F172A;
-  --color-lead-teal: #0D9488;
-  --color-lead-slate: #64748B;
+  /* Slate 900 - Deep dark background */
+  --color-lead-surface: #1E293B;
+  /* Slate 800 - Elevated cards/surfaces */
+  --color-lead-teal: #10B981;
+  /* Emerald 500 - Contrast-friendly action color */
+  --color-lead-slate: #94A3B8;
+  /* Slate 400 - Main soft text */
+  --color-lead-slate-light: #CBD5E1;
+  /* Slate 300 - Highlight soft text */
   --color-lead-amber: #B45309;
+  /* Caution/Orange */
   --color-lead-white: #F8FAFC;
+  /* Slate 50 - High contrast text off-white */
+  --color-lead-purple: #9333ea;
+  /* Kept for legacy if needed */
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
+
+  /* Fallback or specific light mode if requested, but we force Dark Navy for UX */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #0F172A;
   }
 }
 
