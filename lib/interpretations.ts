@@ -1,85 +1,91 @@
+// Calculation ranges for interpreted scores:
+// 5 = Arquitecto
+// 3.9 = Riesgo (1 marca)
+// 2.5 = Crisis (2 marcas)
+// 1.0 = Caos Total (3 o 4 marcas)
+
 export const getInterpretation = (id: string, score: number) => {
-  if (score <= 2.5) {
+  if (score <= 2.5) { // 2.5 o 1.0 (Caos o Crisis)
     const data = {
       L: {
-        title: "Cuello de Botella Humano",
-        titleDesc: "El líder centraliza todas las decisiones. Existe un agotamiento decisional crítico y se decide exclusivamente desde la urgencia.",
-        diag: "Asfixia por Control",
-        diagDesc: "La operación se detiene si el líder no está presente."
+        title: "Pilar L: Liderazgo (Criterio y Decisión)",
+        titleDesc: "Evaluación de Facilitador Estratégico vs. Cuello de Botella Operativo.",
+        diag: "Centralización Crítica",
+        diagDesc: "El líder opera bajo la creencia de que 'si baja el ritmo, todo se cae'. Existe una incapacidad para delegar debido a la falta de confianza en el criterio del equipo. La agenda está secuestrada por urgencias y el líder interviene en decisiones mínimas, anulando la autonomía del grupo."
       },
       E: {
-        title: "Anarquía Operativa",
-        titleDesc: "Confusión absoluta en roles y responsabilidades. El desorden comunicacional y el retrabajo son la norma diaria.",
-        diag: "Entropía Organizacional",
-        diagDesc: "Energía desperdiciada en fricciones internas constantes."
+        title: "Pilar E: Estructura (Roles y Procesos)",
+        titleDesc: "Fugas de productividad por desorden, retrabajo o reglas no funcionales.",
+        diag: "Caos Operativo",
+        diagDesc: "No existen procesos definidos; el conocimiento reside en las personas y no en el sistema. Los roles se solapan, lo que genera duplicidad de tareas o vacíos de responsabilidad. El retrabajo es la norma y la improvisación domina la ejecución diaria."
       },
       A: {
-        title: "Foco Disperso",
-        titleDesc: "Se confunde actividad con avance. No hay claridad sobre qué 'mueve la aguja', priorizando lo urgente sobre lo importante.",
-        diag: "Deriva Estratégica",
-        diagDesc: "El equipo trabaja mucho pero el negocio no progresa."
+        title: "Pilar A: Alineación (Prioridades y Objetivos)",
+        titleDesc: "Conexión entre el esfuerzo diario del equipo y los objetivos estratégicos.",
+        diag: "Desconexión Total",
+        diagDesc: "El equipo trabaja mucho pero el negocio no progresa ('Deriva Estratégica'). Las prioridades cambian cada día según el humor del líder o la última queja de un cliente. No hay una visión compartida de qué significa el 'éxito' semanal."
       },
       D: {
-        title: "Ceguera de Gestión",
-        titleDesc: "No se trabaja con indicadores claros ni métricas operativas. Los resultados son inconsistentes y dependen de la suerte o crisis.",
-        diag: "Gestión por Intuición",
-        diagDesc: "Imposibilidad de mejorar lo que no se mide."
+        title: "Pilar D: Desempeño (Métricas y Hábitos)",
+        titleDesc: "Capacidad de la organización para medir, sostener y predecir el éxito.",
+        diag: "Ceguera de Gestión",
+        diagDesc: "Gestión por intuición. No se utilizan indicadores (KPIs) y los resultados son inconsistentes, dependiendo de crisis o golpes de suerte. Es imposible mejorar lo que no se mide; el equipo no tiene feedback sobre su rendimiento real."
       },
     };
     return data[id as keyof typeof data];
-  } else if (score <= 3.9) {
+  } else if (score <= 3.9) { // 3.9 (Riesgo / Frágil)
     const data = {
       L: {
-        title: "Liderazgo Reactivo",
-        titleDesc: "Se delega de forma incompleta o sin criterios claros. El líder intenta 'poder con todo' solo, lo que genera un desgaste del rol.",
-        diag: "Esfuerzo Heroico",
-        diagDesc: "Se confunde poner más horas de trabajo con liderar el sistema."
+        title: "Pilar L: Liderazgo (Criterio y Decisión)",
+        titleDesc: "Evaluación de Facilitador Estratégico vs. Cuello de Botella Operativo.",
+        diag: "Liderazgo Reactivo",
+        diagDesc: "Hay intentos de delegación, pero son incompletos o generan ansiedad. El líder evita conversaciones difíciles y las decisiones se toman por presión del momento en lugar de seguir criterios preestablecidos. El equipo avanza, pero escala problemas operativos constantemente."
       },
       E: {
-        title: "Orden Frágil",
-        titleDesc: "Existen procesos, pero son complejos o se ignoran ante la presión. La estructura depende de la memoria de la gente y no de sistemas claros.",
-        diag: "Estructura de Papel",
-        diagDesc: "Hay roles definidos, pero en la práctica las tareas se pisan entre sí."
+        title: "Pilar E: Estructura (Roles y Procesos)",
+        titleDesc: "Fugas de productividad por desorden, retrabajo o reglas no funcionales.",
+        diag: "Orden Frágil",
+        diagDesc: "Existen manuales o descripciones de puestos, pero no se consultan o están desactualizados. La estructura depende de la buena voluntad individual. Hay procesos 'conocidos' pero no 'optimizados', lo que genera fricciones constantes en la entrega de resultados."
       },
       A: {
-        title: "Alineación Parcial",
-        titleDesc: "Hay objetivos, pero no son compartidos o vividos por el equipo. Las urgencias diarias suelen descarrilar los planes semanales.",
-        diag: "Falsa Sincronía",
-        diagDesc: "El líder cree que están alineados, pero el equipo opera con prioridades distintas."
+        title: "Pilar A: Alineación (Prioridades y Objetivos)",
+        titleDesc: "Conexión entre el esfuerzo diario del equipo y los objetivos estratégicos.",
+        diag: "Sincronía Superficial",
+        diagDesc: "Se conocen los objetivos anuales, pero no se traducen en acciones cotidianas. Las urgencias descarrilan los planes con frecuencia. Existe una 'Falsa Sincronía' donde el líder cree que están alineados, pero el equipo opera con agendas distintas."
       },
       D: {
-        title: "Métricas de Espejismo",
-        titleDesc: "Se miden cosas, pero no hay rutinas de seguimiento ni feedback constante. Los datos no se usan para tomar decisiones estratégicas.",
+        title: "Pilar D: Desempeño (Métricas y Hábitos)",
+        titleDesc: "Capacidad de la organización para medir, sostener y predecir el éxito.",
         diag: "Control sin Ajuste",
-        diagDesc: "Se detectan los problemas cuando ya es tarde para corregirlos."
+        diagDesc: "Se miden datos ('Métricas de Espejismo'), pero no se usan para tomar decisiones. No hay rutinas de seguimiento (ritmo de reuniones) ni hábitos de ejecución instalados. Los reportes se ven una vez al mes, cuando ya es tarde para corregir el rumbo."
       },
     };
     return data[id as keyof typeof data];
-  } else {
+  } else { // 5.0 (Optimizado / Sin Fugas)
     const data = {
       L: {
-        title: "Arquitecto Estratégico",
-        titleDesc: "Claridad total de rol y toma de decisiones con criterio. El líder recupera su foco estratégico y tranquilidad bajo presión.",
-        diag: "Liderazgo de Alto Nivel",
-        diagDesc: "El líder dirige el sistema, no las micro-tareas."
+        title: "Pilar L: Liderazgo (Criterio y Decisión)",
+        titleDesc: "Evaluación de Facilitador Estratégico vs. Cuello de Botella Operativo.",
+        diag: "Facilitador Estratégico",
+        diagDesc: "El líder ha separado su identidad del control absoluto. Existe un sistema de mentoría recurrente y el equipo resuelve problemas por cuenta propia. La toma de decisiones es predecible y basada en criterios de negocio, no en emociones o urgencias."
       },
       E: {
-        title: "Maquinaria Fluida",
-        titleDesc: "Roles y responsabilidades definidos y respetados. Procesos críticos simplificados que permiten la autonomía del equipo.",
-        diag: "Eficiencia Sistémica",
-        diagDesc: "El equipo sabe qué hacer y cómo hacerlo sin supervisión constante."
+        title: "Pilar E: Estructura (Roles y Procesos)",
+        titleDesc: "Fugas de productividad por desorden, retrabajo o reglas no funcionales.",
+        diag: "Sistema Escalable",
+        diagDesc: "Cada integrante conoce su impacto y responsabilidad específica. Los procesos están simplificados y documentados, permitiendo que el equipo opere con fluidez. La estructura sostiene el crecimiento sin necesidad de supervisión constante."
       },
       A: {
-        title: "Enfoque Láser",
-        titleDesc: "Prioridades y objetivos compartidos por todos. El esfuerzo se convierte directamente en resultados predecibles.",
-        diag: "Sinergia Operativa",
-        diagDesc: "Alineación real que reduce el desgaste y maximiza el impacto."
+        title: "Pilar A: Alineación (Prioridades y Objetivos)",
+        titleDesc: "Conexión entre el esfuerzo diario del equipo y los objetivos estratégicos.",
+        diag: "Enfoque Láser",
+        diagDesc: "El esfuerzo de cada miembro se traduce directamente en resultados predecibles. Existe una sinergia operativa donde todos saben qué es lo más importante en cada momento. La alineación reduce el desgaste y maximiza el impacto estratégico."
       },
       D: {
-        title: "Cultura de Resultados",
-        titleDesc: "Indicadores simples y hábitos de ejecución instalados. Mejora concreta del 15% al 30% en la productividad.",
-        diag: "Alto Desempeño Sostenible",
-        diagDesc: "Resultados medibles y perdurables en el tiempo."
+        title: "Pilar D: Desempeño (Métricas y Hábitos)",
+        titleDesc: "Capacidad de la organización para medir, sostener y predecir el éxito.",
+        diag: "Cultura de Resultados",
+        diagDesc: "Indicadores simples y potentes guían la operación. El seguimiento es parte de la cultura (rutinas de feedback). Existe una mejora concreta de entre el 15% y el 30% en la productividad gracias al ajuste constante basado en datos reales."
       },
     };
     return data[id as keyof typeof data];

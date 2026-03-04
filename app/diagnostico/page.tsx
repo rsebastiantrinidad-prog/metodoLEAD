@@ -3,56 +3,62 @@
 import { useState } from 'react';
 import { leadQuestions, CategoryId } from '@/lib/questions';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, PolarRadiusAxis } from 'recharts';
-import { ChevronRight, ChevronLeft, Send, CheckCircle2, RotateCcw } from 'lucide-react';
+import { ChevronRight, CheckCircle2, RotateCcw, CheckSquare, Square, AlertTriangle, TrendingDown, Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getInterpretation } from '@/lib/interpretations';
 import { supabase } from '@/lib/supabase';
 
 export default function DiagnosticoPage() {
   const router = useRouter();
-  const [step, setStep] = useState(0); // 0 a 31 (las 32 preguntas)
-  const [respuestas, setRespuestas] = useState<Record<string, number>>({});
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [step, setStep] = useState(0); // 0 a 3 (4 bloques)
+  const [respuestas, setRespuestas] = useState<Record<string, boolean>>({});
   const [finalizado, setFinalizado] = useState(false);
-
   const [isSaving, setIsSaving] = useState(false);
 
-  // Identificar en qué bloque estamos (L, E, A o D)
-  const currentBlockIdx = Math.floor(step / 8);
-  const currentQuestionIdx = step % 8;
-  const currentBlock = leadQuestions[currentBlockIdx];
-  const currentQuestion = currentBlock.preguntas[currentQuestionIdx];
+  const currentBlock = leadQuestions[step];
 
-  const handleSelect = (valor: number) => {
-    setSelectedAnswer(valor);
+  const handleToggleSymptom = (index: number) => {
+    const key = `${currentBlock.id}-${index}`;
+    setRespuestas(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   const handleContinue = async () => {
-    if (selectedAnswer === null) return;
-
-    const nuevasRespuestas = { ...respuestas, [`${currentBlock.id}-${currentQuestionIdx}`]: selectedAnswer };
-    setRespuestas(nuevasRespuestas);
-    setSelectedAnswer(null); // Reset for next
-
-    if (step < 31) {
+    if (step < 3) {
       setStep(step + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setIsSaving(true);
-      await guardarResultados(nuevasRespuestas);
+      await guardarResultados(respuestas);
       setFinalizado(true);
       setIsSaving(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Cálculo de promedios para el gráfico
+  // Cálculo de promedios para el gráfico basados en "clics" de síntomas (fugas)
   const calcularPromedio = (id: CategoryId, currentRespuestas = respuestas) => {
-    const keys = Object.keys(currentRespuestas).filter(k => k.startsWith(id));
-    if (keys.length === 0) return 0;
-    const suma = keys.reduce((acc, k) => acc + currentRespuestas[k], 0);
-    return suma / 8; // Divide explicitly by 8 according to LEAD questions mapping
+    let clicks = 0;
+    for (let i = 0; i < 4; i++) {
+      if (currentRespuestas[`${id}-${i}`]) {
+        clicks++;
+      }
+    }
+
+    // Reverse scoring logic
+    if (clicks === 0) return 5.0; // Arquitecto (100% Saludable)
+    if (clicks === 1) return 3.9; // Riesgo (Orden Frágil)
+    if (clicks === 2) return 2.5; // Crisis (Cuello parcial)
+    return 1.0; // Caos Total (3 o 4 opciones)
   };
 
-  const guardarResultados = async (todasLasRespuestas: Record<string, number>) => {
+  const calcularFugasTotales = () => {
+    return Object.values(respuestas).filter(v => v === true).length;
+  };
+
+  const guardarResultados = async (todasLasRespuestas: Record<string, boolean>) => {
     try {
       const storedNombre = sessionStorage.getItem('lead_nombre') || 'Usuario Anónimo';
       const storedEmail = sessionStorage.getItem('lead_email') || 'sin@email.com';
@@ -69,30 +75,31 @@ export default function DiagnosticoPage() {
         }
       };
 
-      console.log("Intentando guardar este payload en Supabase:", payload);
+      console.log("Saving payload to Supabase:", payload);
 
       const { data, error } = await supabase
         .from('diagnosticos')
         .insert([payload]);
 
       if (error) {
-        console.error("Error al guardar en Supabase:", error);
+        console.error("Error saving to Supabase:", error);
       } else {
-        console.log("Resultados guardados correctamente:", data);
+        console.log("Results saved:", data);
       }
     } catch (err: any) {
-      console.error("Error excepcional al guardar:", err);
+      console.error("Exception saving:", err);
     }
   };
 
   const dataGrafico = [
-    { subject: 'Liderazgo', A: calcularPromedio('L'), fullMark: 5 },
-    { subject: 'Estructura', A: calcularPromedio('E'), fullMark: 5 },
-    { subject: 'Alineación', A: calcularPromedio('A'), fullMark: 5 },
-    { subject: 'Desempeño', A: calcularPromedio('D'), fullMark: 5 },
+    { subject: 'Liderazgo', A: calcularPromedio('L'), perfect: 5 },
+    { subject: 'Estructura', A: calcularPromedio('E'), perfect: 5 },
+    { subject: 'Alineación', A: calcularPromedio('A'), perfect: 5 },
+    { subject: 'Desempeño', A: calcularPromedio('D'), perfect: 5 },
   ];
 
   if (finalizado) {
+    const totalFugas = calcularFugasTotales();
     return (
       <div className="max-w-4xl mx-auto p-4 md:p-8 text-center mt-4">
         <div className="bg-lead-surface rounded-lg shadow-black/20 shadow-xl border border-slate-700/50 p-6 md:p-10 mb-8 relative overflow-hidden">
@@ -107,9 +114,20 @@ export default function DiagnosticoPage() {
                 <PolarGrid stroke="#334155" strokeDasharray="3 3" />
                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#94A3B8', fontWeight: 600, fontSize: 13 }} />
                 <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
+                {/* Capa "Estado Deseado" (Sombra perfecta) */}
+                <Radar name="Ideal" dataKey="perfect" stroke="#334155" strokeWidth={1} fill="#e2e8f0" fillOpacity={0.03} />
+                {/* Capa "Situación Actual" */}
                 <Radar name="LEAD" dataKey="A" stroke="#10B981" strokeWidth={2} fill="#10B981" fillOpacity={0.3} />
               </RadarChart>
             </ResponsiveContainer>
+          </div>
+
+          <div className="mb-10 bg-slate-900/40 border border-lead-teal/30 p-6 rounded-lg shadow-inner">
+            <p className="text-lg md:text-xl text-lead-slate-light font-medium leading-relaxed">
+              Has marcado <span className="text-lead-teal font-bold text-2xl px-1">{totalFugas}</span> fugas de sistema.
+              <br className="mb-2" />
+              Esto confirma que hoy lideras desde la urgencia y no desde un sistema estable. <br className="hidden md:block" /> El <span className="text-lead-white font-bold">Método LEAD®</span> transformará estos clics en autonomía en 90 días.
+            </p>
           </div>
 
           <div className="grid gap-5 md:gap-6 text-left lg:grid-cols-2 relative z-10">
@@ -154,7 +172,7 @@ export default function DiagnosticoPage() {
                   {interpretacion && (
                     <div className="space-y-4 mt-auto flex-grow">
                       <div className="bg-slate-900/30 p-5 rounded-lg border border-slate-700/30">
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-700/50 pb-2">
                           {interpretacion.title}
                         </p>
                         <p className="text-sm text-lead-slate-light leading-relaxed font-medium">
@@ -162,10 +180,10 @@ export default function DiagnosticoPage() {
                         </p>
                       </div>
                       <div className={`${colorClasses.bg} p-5 rounded-lg border ${colorClasses.border}`}>
-                        <p className={`text-[11px] font-bold ${colorClasses.title} uppercase tracking-widest mb-2`}>
+                        <p className={`text-[12px] font-bold ${colorClasses.title} uppercase tracking-widest mb-3`}>
                           Diagnóstico: <span className="font-extrabold text-lead-white">{interpretacion.diag}</span>
                         </p>
-                        <p className={`text-sm ${colorClasses.text} leading-relaxed font-medium`}>
+                        <p className={`text-[14.5px] ${colorClasses.text} leading-[1.6] font-medium`}>
                           {interpretacion.diagDesc}
                         </p>
                       </div>
@@ -176,7 +194,117 @@ export default function DiagnosticoPage() {
             })}
           </div>
 
-          <div className="mt-12 mb-2 pt-8 border-t border-slate-700/50 flex justify-center relative z-10">
+          {/* ------------- COSTO DE INACCIÓN (COI) ------------- */}
+          {(() => {
+            const sumL = calcularPromedio('L');
+            const sumE = calcularPromedio('E');
+            const sumA = calcularPromedio('A');
+            const sumD = calcularPromedio('D');
+            const scoreGlobal = (sumL + sumE + sumA + sumD) / 4;
+
+            let riskLevel = "Leve (< 5.0)";
+            let riskTitle = "Pérdida de Foco";
+            let riskImpact = "Desgaste innecesario que impide pasar al siguiente nivel de excelencia.";
+            let riskColor = "text-amber-400";
+            let riskBorder = "border-amber-500/50";
+            let riskBg = "bg-amber-900/10";
+
+            if (scoreGlobal <= 2.5) {
+              riskLevel = "Crítico (< 2.5)";
+              riskTitle = "Colapso Operativo";
+              riskImpact = "Renuncia o baja médica del líder por agotamiento profundo.";
+              riskColor = "text-red-500";
+              riskBorder = "border-red-500/50";
+              riskBg = "bg-red-900/10";
+            } else if (scoreGlobal <= 3.9) {
+              riskLevel = "Moderado (< 3.9)";
+              riskTitle = "Estancamiento de Margen";
+              riskImpact = "Pérdida sostenida de competitividad y fuga de talento por falta de claridad.";
+              riskColor = "text-orange-500";
+              riskBorder = "border-orange-500/50";
+              riskBg = "bg-orange-900/10";
+            }
+
+            const isAgotamiento = sumL <= 3.9 && sumD <= 3.9;
+            const isCrecimientoFrenado = sumE <= 3.9;
+            const isPerdidaProductividad = totalFugas > 0;
+
+            if (totalFugas === 0) return null; // No COI if perfect score
+
+            return (
+              <div className="mt-12 text-left relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <AlertTriangle className="text-red-500" size={28} />
+                  <h3 className="text-2xl font-bold text-lead-white tracking-tight">Proyección del Costo de Inacción (COI)</h3>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4 mb-6">
+                  {/* KPI Matriz Global */}
+                  <div className={`${riskBg} p-5 rounded-lg border ${riskBorder} flex flex-col justify-center`}>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Impacto a 6 Meses</p>
+                    <p className={`text-xl font-black ${riskColor} mb-2`}>{riskTitle}</p>
+                    <p className="text-[13px] text-lead-slate-light font-medium leading-relaxed">{riskImpact}</p>
+                    <div className="mt-auto pt-4">
+                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded bg-black/20 ${riskColor} uppercase tracking-wider border ${riskBorder}`}>
+                        Nivel: {riskLevel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Riesgos Específicos Dinámicos */}
+                  <div className="md:col-span-2 grid sm:grid-cols-2 gap-4">
+                    {isAgotamiento && (
+                      <div className="bg-slate-800/50 p-5 rounded-lg border border-slate-700">
+                        <Activity className="text-red-400 mb-3" size={20} />
+                        <h4 className="text-[15px] font-bold text-lead-white mb-2">Agotamiento Crónico</h4>
+                        <p className="text-[13px] text-slate-400 leading-relaxed">
+                          La permanencia en tu rol peligra por sobrecarga y burnout funcional, dejando a la empresa sin su principal tomador de decisiones.
+                        </p>
+                      </div>
+                    )}
+                    {isCrecimientoFrenado && (
+                      <div className="bg-slate-800/50 p-5 rounded-lg border border-slate-700">
+                        <TrendingDown className="text-orange-400 mb-3" size={20} />
+                        <h4 className="text-[15px] font-bold text-lead-white mb-2">Crecimiento Frenado</h4>
+                        <p className="text-[13px] text-slate-400 leading-relaxed">
+                          La empresa no puede escalar. Como la operación absorbe el 100% de tu capacidad, el crecimiento se detiene de forma tajante.
+                        </p>
+                      </div>
+                    )}
+                    {isPerdidaProductividad && (
+                      <div className={`${!isAgotamiento || !isCrecimientoFrenado ? 'sm:col-span-2' : ''} bg-slate-800/50 p-5 rounded-lg border border-slate-700 flex items-start gap-4`}>
+                        <div className="text-2xl font-black text-lead-teal bg-emerald-900/30 px-3 py-2 rounded border border-emerald-500/30 shrink-0">
+                          -30%
+                        </div>
+                        <div>
+                          <h4 className="text-[15px] font-bold text-lead-white mb-1">Pérdida Operativa Constante</h4>
+                          <p className="text-[13px] text-slate-400 leading-relaxed">
+                            Aceptas una pérdida de hasta 30% en capacidad. Estás quemando dinero y tiempo cada mes en tareas duplicadas y confusión estructural.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/80 p-6 rounded-lg border border-slate-700/80 text-center">
+                  <p className="text-lg text-lead-slate-light font-medium italic">
+                    "¿Cuánto te cuesta operativa, financiera y personalmente mantenerte como el cuello de botella de tu propio modelo de negocio?"
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+
+          <div className="mt-12 mb-2 pt-8 border-t border-slate-700/50 flex flex-col md:flex-row gap-4 justify-center relative z-10">
+            <button
+              onClick={() => {
+                window.location.href = "https://calendly.com/"; // Reemplazar con URL real
+              }}
+              className="flex items-center gap-2 bg-lead-teal hover:bg-emerald-600 text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 shadow-md shadow-emerald-900/40 w-full md:w-auto justify-center text-[15px] tracking-wide"
+            >
+              Agenda una consulta.
+            </button>
             <button
               onClick={() => {
                 sessionStorage.removeItem('lead_nombre');
@@ -186,7 +314,7 @@ export default function DiagnosticoPage() {
               className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-lead-white px-8 py-4 rounded-lg font-bold transition-all duration-300 shadow-md group w-full md:w-auto justify-center text-[15px] tracking-wide"
             >
               <RotateCcw size={18} className="group-hover:-rotate-90 transition-transform duration-300" />
-              Volver al Inicio
+              Hacer test de nuevo
             </button>
           </div>
         </div>
@@ -201,97 +329,64 @@ export default function DiagnosticoPage() {
       <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl pt-6 px-6 pb-4 border-b border-slate-800 shadow-sm mb-8">
         <div className="flex justify-between items-center mb-3">
           <span className="text-emerald-400 font-bold tracking-widest uppercase text-[11px] px-2.5 py-1 rounded bg-emerald-900/20 border border-emerald-800/50">
-            B-{currentBlock.id}: {currentBlock.titulo}
+            Paso {step + 1} de 4
           </span>
           <span className="text-slate-400 font-bold text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-md">
-            {step + 1}<span className="font-normal text-slate-500"> / 32</span>
+            Pilar <span className="text-lead-white">{currentBlock.id}</span>
           </span>
         </div>
         <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden border border-slate-700">
           <div
             className="bg-lead-teal h-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-            style={{ width: `${((step + 1) / 32) * 100}%` }}
+            style={{ width: `${((step + 1) / 4) * 100}%` }}
           />
         </div>
       </div>
 
       <div className="px-5 md:px-8">
-        {/* 2. Optimización Texto Pregunta */}
+        {/* 2. Optimización Título Contenedor */}
         <div className="bg-lead-surface rounded-lg p-6 md:p-8 shadow-black/20 shadow-xl border border-slate-700/50 mb-8 relative overflow-hidden">
-          <h2 className="text-2xl md:text-3xl font-bold text-lead-white leading-tight tracking-tight relative z-10">
-            {currentQuestion}
+          <h2 className="text-2xl md:text-3xl font-bold text-lead-white leading-tight tracking-tight mb-2">
+            {currentBlock.titulo}
           </h2>
+          <p className="text-lead-slate-light font-medium text-sm md:text-base">
+            {currentBlock.objetivo}
+          </p>
         </div>
 
         {isSaving ? (
           <div className="flex flex-col items-center justify-center p-12 text-lead-teal">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-currentColor mb-4"></div>
-            <p className="font-bold text-center text-lg animate-pulse">Guardando y calculando tu diagnóstico...</p>
+            <p className="font-bold text-center text-lg animate-pulse">Analizando tus respuestas y calculando el Mapa de Calor...</p>
           </div>
         ) : (
-          <div className="flex flex-col w-full">
-            <div className="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-8 my-8 md:my-12">
-              {/* Desktop Left Label - Agree (5) */}
-              <span className="hidden md:block text-emerald-400 font-bold text-sm md:text-base text-right md:w-32 lg:w-40 leading-tight">
-                {currentBlock.escala[4]}
-              </span>
+          <div className="flex flex-col w-full space-y-4">
 
-              <div className="flex flex-col items-center justify-center w-full md:w-auto">
-                {/* Mobile Labels */}
-                <div className="flex md:hidden justify-between w-full mb-6 px-1">
-                  <span className="text-emerald-400 font-bold text-sm text-left w-[45%] leading-tight">{currentBlock.escala[4]}</span>
-                  <span className="text-slate-400 font-bold text-sm text-right w-[45%] leading-tight">{currentBlock.escala[0]}</span>
-                </div>
-
-                {/* Circles */}
-                <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-5">
-                  {[5, 4, 3, 2, 1].map((valor) => {
-                    const isSelected = selectedAnswer === valor;
-
-                    let sizeClass = "w-9 h-9 sm:w-10 sm:h-10"; // middle
-                    if (valor === 5 || valor === 1) sizeClass = "w-14 h-14 sm:w-16 sm:h-16"; // large
-                    else if (valor === 4 || valor === 2) sizeClass = "w-11 h-11 sm:w-12 sm:h-12"; // medium
-
-                    let colorClass = "";
-                    let selectedClass = "";
-
-                    if (valor === 5 || valor === 4) {
-                      colorClass = "border-emerald-500/30 hover:bg-emerald-500/10 hover:border-emerald-400";
-                      selectedClass = "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]";
-                    } else if (valor === 2 || valor === 1) {
-                      colorClass = "border-slate-500/40 hover:bg-slate-500/20 hover:border-slate-400";
-                      selectedClass = "bg-slate-600 border-slate-500 text-white shadow-[0_0_10px_rgba(71,85,105,0.4)]";
-                    } else {
-                      colorClass = "border-slate-600/50 hover:bg-slate-600/30 hover:border-slate-500";
-                      selectedClass = "bg-slate-600 border-slate-500 text-white shadow-sm";
-                    }
-
-                    return (
-                      <button
-                        key={valor}
-                        onClick={() => handleSelect(valor)}
-                        className={`rounded-full border-[2px] transition-all duration-300 flex items-center justify-center relative ${sizeClass} ${isSelected ? selectedClass + ' scale-110' : colorClass + ' bg-slate-900/40'}`}
-                        aria-label={`Seleccionar valor ${valor}`}
-                      >
-                        {isSelected && (
-                          <span className="absolute inset-0 rounded-full bg-white opacity-20 outline-none ring-0 animate-ping" style={{ animationIterationCount: 1, animationDuration: '400ms' }}></span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Desktop Right Label - Disagree (1) */}
-              <span className="hidden md:block text-slate-400 font-bold text-sm md:text-base text-left md:w-32 lg:w-40 leading-tight">
-                {currentBlock.escala[0]}
-              </span>
-            </div>
+            {/* Opciones (Checkboxes) */}
+            {currentBlock.sintomas.map((sintoma, idx) => {
+              const isChecked = respuestas[`${currentBlock.id}-${idx}`] || false;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => handleToggleSymptom(idx)}
+                  className={`w-full text-left p-5 rounded-lg border-2 transition-all duration-300 flex items-start gap-4 ${isChecked
+                    ? 'bg-emerald-900/20 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.15)] shadow-md'
+                    : 'bg-slate-800/50 border-slate-700 hover:border-slate-500 hover:bg-slate-800'
+                    }`}
+                >
+                  <div className={`mt-0.5 flex-shrink-0 transition-colors ${isChecked ? 'text-emerald-400' : 'text-slate-500'}`}>
+                    {isChecked ? <CheckSquare size={22} className="fill-emerald-900/40" /> : <Square size={22} />}
+                  </div>
+                  <span className={`text-[15px] md:text-base font-medium leading-relaxed ${isChecked ? 'text-lead-white' : 'text-lead-slate-light'}`}>
+                    {sintoma}
+                  </span>
+                </button>
+              );
+            })}
 
             <button
               onClick={handleContinue}
-              disabled={selectedAnswer === null}
-              className="mt-6 w-full flex justify-center items-center gap-2 bg-lead-teal hover:bg-emerald-600 disabled:bg-slate-800 disabled:text-slate-600 disabled:border disabled:border-slate-700 disabled:shadow-none text-white py-4 rounded-lg font-bold text-[15px] shadow-lg hover:shadow-emerald-900/40 transition-colors duration-300 tracking-wide"
+              className="mt-8 w-full flex justify-center items-center gap-2 bg-lead-teal hover:bg-emerald-600 text-white py-4 rounded-lg font-bold text-[15px] shadow-lg hover:shadow-emerald-900/40 transition-colors duration-300 tracking-wide"
             >
               Continuar <ChevronRight size={18} />
             </button>
