@@ -72,19 +72,41 @@ export default function DiagnosticoPage() {
           E: calcularPromedio('E', todasLasRespuestas),
           A: calcularPromedio('A', todasLasRespuestas),
           D: calcularPromedio('D', todasLasRespuestas)
-        }
+        },
+        // Marcar la hora en que el test se completó
+        completed_at: new Date().toISOString()
       };
 
       console.log("Saving payload to Supabase:", payload);
 
-      const { data, error } = await supabase
-        .from('diagnosticos')
-        .insert([payload]);
+      if (storedEmail !== 'sin@email.com') {
+        // Fase 2: Usamos una función RPC (Security Definer) para saltarnos 
+        // la restricción de SELECT en RLS y poder actualizar el registro
+        const { error: updateError } = await supabase.rpc('terminar_diagnostico', {
+          p_email: storedEmail,
+          p_respuestas: payload.respuestas,
+          p_promedios: payload.promedios,
+          p_completed_at: payload.completed_at
+        });
 
-      if (error) {
-        console.error("Error saving to Supabase:", error);
+        if (updateError) {
+          console.error("Error updating via RPC Supabase:", updateError);
+          // Fallback a insert si la RPC falla por alguna razón (ej. no está creada)
+          await supabase.from('diagnosticos').insert([payload]);
+        } else {
+          console.log("Results updated successfully via RPC");
+        }
       } else {
-        console.log("Results saved:", data);
+        // Fallback: Si no hay email, insertamos uno nuevo
+        const { error: insertError } = await supabase
+          .from('diagnosticos')
+          .insert([payload]);
+
+        if (insertError) {
+          console.error("Error saving fallback to Supabase:", insertError);
+        } else {
+          console.log("Results saved (fallback insert)");
+        }
       }
     } catch (err: any) {
       console.error("Exception saving:", err);

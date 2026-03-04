@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, CheckCircle, Target, BarChart3, Mail, User } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const router = useRouter();
@@ -21,13 +22,33 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (nombre.trim() && email.trim()) {
       setIsSubmitting(true);
       // Guardar en sessionStorage para recuperarlo luego al finalizar el test
       sessionStorage.setItem('lead_nombre', nombre);
       sessionStorage.setItem('lead_email', email);
+
+      // Fase 1 Supabase: Insertar lead inicial
+      try {
+        const payload = {
+          full_name: nombre,
+          email: email,
+          started_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from('diagnosticos')
+          .insert([payload]);
+
+        if (error) {
+          console.error("Error creating lead record in Supabase:", error);
+        }
+      } catch (err) {
+        console.error("Exception creating lead record in Supabase:", err);
+      }
+
       router.push('/diagnostico');
     }
   };
