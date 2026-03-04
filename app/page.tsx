@@ -156,7 +156,7 @@ export default function Home() {
 
             {/* 01. Liderazgo */}
             <div className="bg-[#101722]/80 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group hover:border-[#12b886]/30 transition-colors">
-              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">01</div>
+              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">L</div>
               <h3 className="text-xl font-bold text-white mb-6 relative z-10 flex items-center gap-3">
                 <span className="text-[#12b886] font-mono text-sm">/L</span> El Protocolo: Liderazgo y Criterio
               </h3>
@@ -178,7 +178,7 @@ export default function Home() {
 
             {/* 02. Estructura */}
             <div className="bg-[#101722]/80 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group hover:border-[#12b886]/30 transition-colors">
-              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">02</div>
+              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">E</div>
               <h3 className="text-xl font-bold text-white mb-6 relative z-10 flex items-center gap-3">
                 <span className="text-[#12b886] font-mono text-sm">/E</span> La Infraestructura: Estructura de Roles
               </h3>
@@ -200,7 +200,7 @@ export default function Home() {
 
             {/* 03. Alineación */}
             <div className="bg-[#101722]/80 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group hover:border-[#12b886]/30 transition-colors">
-              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">03</div>
+              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">A</div>
               <h3 className="text-xl font-bold text-white mb-6 relative z-10 flex items-center gap-3">
                 <span className="text-[#12b886] font-mono text-sm">/A</span> La Sincronización: Alineación de Vectores
               </h3>
@@ -222,7 +222,7 @@ export default function Home() {
 
             {/* 04. Desempeño */}
             <div className="bg-[#101722]/80 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group hover:border-[#12b886]/30 transition-colors">
-              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">04</div>
+              <div className="absolute top-0 right-0 p-6 opacity-10 font-mono text-8xl font-black text-white group-hover:text-[#12b886] group-hover:opacity-20 transition-all">D</div>
               <h3 className="text-xl font-bold text-white mb-6 relative z-10 flex items-center gap-3">
                 <span className="text-[#12b886] font-mono text-sm">/D</span> La Telemetría: Capa de Desempeño
               </h3>
