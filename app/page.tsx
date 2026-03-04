@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, CheckCircle, Target, BarChart3, Mail, User } from 'lucide-react';
 
@@ -9,6 +9,17 @@ export default function Home() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    // Use passive listener for better performance
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,81 +31,114 @@ export default function Home() {
       router.push('/diagnostico');
     }
   };
-  return (
-    <main className="min-h-screen bg-lead-navy text-lead-slate-light transition-colors selection:bg-lead-teal/20">
-      {/* Hero Section */}
-      <section className="max-w-4xl mx-auto pt-20 pb-16 px-6 text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-lead-white mb-6 tracking-tight">
-          ¿Eres el cuello de botella de tu propio equipo? <span className="text-lead-teal">LEAD®</span>
-        </h1>
-        <p className="text-xl text-lead-slate mb-10 leading-relaxed font-medium">
-          Mide tu nivel de autonomía y descubre cómo pasar de apagar incendios a liderar con sistema en los próximos 90 días.
-        </p>
 
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-lead-surface p-6 rounded-lg shadow-black/20 shadow-xl border border-slate-700/50 space-y-4">
-          <div className="text-left">
-            <label className="block text-sm font-bold text-lead-slate-light mb-1">Nombre Completo</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-lead-slate/70" />
+  return (
+    <main className="relative min-h-screen flex flex-col justify-center items-center text-slate-200 selection:bg-[#12b886]/30 font-sans overflow-hidden">
+      {/* Background Image with Gradient Overlay & Parallax Animation */}
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat will-change-transform transition-transform duration-1000 ease-out"
+        style={{
+          backgroundImage: `url('/image_1.png')`,
+          // Escala sutil de 1.05, y velocidad reducida a 0.04 (4% del scroll) para un parallax extremadamente suave y flotante
+          transform: `scale(1.05) translateY(${scrollY * 0.04}px)`,
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1128]/80 via-[#0a1128]/60 to-black/85"></div>
+      </div>
+
+      {/* Content Container */}
+      <div className="relative z-10 w-full max-w-5xl px-4 py-12 md:py-20 flex flex-col items-center">
+
+        {/* Hero Section */}
+        <div className="text-center max-w-3xl mb-10">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-md">
+            ¿Tu equipo depende de ti para avanzar? <span className="text-[#12b886]">LEAD®</span>
+          </h1>
+          <p className="text-lg md:text-xl text-slate-300 mb-8 leading-relaxed font-medium drop-shadow-sm max-w-2xl mx-auto">
+            Mide la salud operativa de tu liderazgo y transforma el desorden en un sistema de ejecución de alto desempeño en 90 días.
+          </p>
+        </div>
+
+        {/* Central Form with Glassmorphism */}
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-md bg-[#1e2531]/70 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/10 space-y-6"
+        >
+          <div className="text-left space-y-1">
+            <label className="block text-sm font-bold text-slate-300">Nombre Completo</label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-[#12b886] group-focus-within:text-[#12b886] transition-colors" />
               </div>
               <input
                 type="text"
                 required
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 border border-slate-600/50 rounded-lg focus:ring-2 focus:ring-lead-teal focus:border-lead-teal bg-slate-900/50 text-lead-white placeholder-slate-500 transition-colors"
+                className="w-full pl-11 pr-4 py-3.5 bg-black/40 border border-white/5 rounded-xl focus:ring-2 focus:ring-[#12b886] focus:border-[#12b886] text-white placeholder-slate-500 transition-all outline-none"
                 placeholder="Ej. John D. Maxwell"
               />
             </div>
           </div>
-          <div className="text-left">
-            <label className="block text-sm font-bold text-lead-slate-light mb-1">Email Corporativo</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-lead-slate/70" />
+
+          <div className="text-left space-y-1">
+            <label className="block text-sm font-bold text-slate-300">Email Corporativo</label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-[#12b886] group-focus-within:text-[#12b886] transition-colors" />
               </div>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 border border-slate-600/50 rounded-lg focus:ring-2 focus:ring-lead-teal focus:border-lead-teal bg-slate-900/50 text-lead-white placeholder-slate-500 transition-colors"
+                className="w-full pl-11 pr-4 py-3.5 bg-black/40 border border-white/5 rounded-xl focus:ring-2 focus:ring-[#12b886] focus:border-[#12b886] text-white placeholder-slate-500 transition-all outline-none"
                 placeholder="Maxwell@lidership.com"
               />
             </div>
           </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 bg-lead-teal hover:bg-teal-700 disabled:bg-teal-400 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all shadow-md hover:shadow-lg mt-4"
+            className="w-full flex items-center justify-center gap-2 bg-[#12b886] hover:bg-[#0fa376] disabled:bg-[#12b886]/50 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-lg hover:shadow-[#12b886]/25 mt-4"
           >
             {isSubmitting ? 'Iniciando...' : 'Iniciar Diagnóstico'}
-            <ArrowRight size={20} />
+            <ArrowRight size={22} />
           </button>
         </form>
-      </section>
 
-      {/* Objetivos del Test */}
-      <section className="max-w-5xl mx-auto py-12 px-6">
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-lead-surface p-8 rounded-lg border border-slate-700/50 shadow-black/10 shadow-lg hover:border-lead-teal/40 transition-colors">
-            <Target className="text-lead-teal mb-4" size={28} />
-            <h3 className="text-lg font-bold mb-2 text-lead-white">Enfoque</h3>
-            <p className="text-lead-slate font-medium text-sm leading-relaxed">Identifica si actúas como cuello de botella o como facilitador estratégico.</p>
+        {/* Objetivos del Test */}
+        <div className="grid md:grid-cols-3 gap-6 mt-16 w-full max-w-5xl">
+          <div className="bg-[#1e2531]/40 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/5 shadow-xl hover:bg-[#1e2531]/60 hover:border-[#12b886]/30 transition-all group">
+            <div className="w-12 h-12 rounded-full bg-[#12b886]/10 flex items-center justify-center mb-4 group-hover:bg-[#12b886]/20 transition-colors">
+              <Target className="text-[#12b886]" size={28} />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-white">Autonomía vs. Dependencia.</h3>
+            <p className="text-slate-400 font-medium text-sm leading-relaxed">
+              Identifica si estás centralizando decisiones y cargando con toda la operación.
+            </p>
           </div>
-          <div className="bg-lead-surface p-8 rounded-lg border border-slate-700/50 shadow-black/10 shadow-lg hover:border-lead-teal/40 transition-colors">
-            <BarChart3 className="text-lead-teal mb-4" size={28} />
-            <h3 className="text-lg font-bold mb-2 text-lead-white">4 Pilares</h3>
-            <p className="text-lead-slate font-medium text-sm leading-relaxed">Evaluación profunda en Liderazgo, Estructura, Alineación y Desempeño.</p>
+          <div className="bg-[#1e2531]/40 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/5 shadow-xl hover:bg-[#1e2531]/60 hover:border-[#12b886]/30 transition-all group">
+            <div className="w-12 h-12 rounded-full bg-[#12b886]/10 flex items-center justify-center mb-4 group-hover:bg-[#12b886]/20 transition-colors">
+              <BarChart3 className="text-[#12b886]" size={28} />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-white">Método LEAD®</h3>
+            <p className="text-slate-400 font-medium text-sm leading-relaxed">
+              Evalúa tu liderazgo, estructura de roles, alineación de objetivos y hábitos de desempeño.
+            </p>
           </div>
-          <div className="bg-lead-surface p-8 rounded-lg border border-slate-700/50 shadow-black/10 shadow-lg hover:border-lead-teal/40 transition-colors">
-            <CheckCircle className="text-lead-teal mb-4" size={28} />
-            <h3 className="text-lg font-bold mb-2 text-lead-white">Plan de Acción</h3>
-            <p className="text-lead-slate font-medium text-sm leading-relaxed">Obtén una interpretación clara y sugerencias de mejora inmediata.</p>
+          <div className="bg-[#1e2531]/40 backdrop-blur-md p-6 lg:p-8 rounded-2xl border border-white/5 shadow-xl hover:bg-[#1e2531]/60 hover:border-[#12b886]/30 transition-all group">
+            <div className="w-12 h-12 rounded-full bg-[#12b886]/10 flex items-center justify-center mb-4 group-hover:bg-[#12b886]/20 transition-colors">
+              <CheckCircle className="text-[#12b886]" size={28} />
+            </div>
+            <h3 className="text-lg font-bold mb-2 text-white">Resultados Medibles.</h3>
+            <p className="text-slate-400 font-medium text-sm leading-relaxed">
+              Recibe sugerencias concretas para reducir el retrabajo y liberar tu agenda operativa.
+            </p>
           </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
