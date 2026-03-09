@@ -271,7 +271,7 @@ export default function Home() {
               Optimiza el ancho de banda de tu liderazgo antes de que el sistema alcance su límite de capacidad.
             </p>
             <a
-              href="https://calendly.com/rsebastian-trinidad/30min"
+              href="https://calendly.com/roxana-ochnicki-executive--growth-partners/reunion-exploratoria-de-liderazgo-?month=2026-03"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex items-center justify-center gap-3 bg-white text-black px-10 py-5 rounded-xl text-lg font-bold transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_40px_rgba(255,255,255,0.25)]"

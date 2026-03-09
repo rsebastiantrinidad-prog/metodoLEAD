@@ -321,7 +321,7 @@ export default function DiagnosticoPage() {
           <div className="mt-12 mb-2 pt-8 border-t border-slate-700/50 flex flex-col md:flex-row gap-4 justify-center relative z-10">
             <button
               onClick={() => {
-                window.location.href = "https://calendly.com/rsebastian-trinidad/30min"; // Reemplazar con URL real
+                window.location.href = "https://calendly.com/roxana-ochnicki-executive--growth-partners/reunion-exploratoria-de-liderazgo-?month=2026-03"; // Reemplazar con URL real
               }}
               className="flex items-center gap-2 bg-lead-teal hover:bg-emerald-600 text-white px-8 py-4 rounded-lg font-bold transition-all duration-300 shadow-md shadow-emerald-900/40 w-full md:w-auto justify-center text-[15px] tracking-wide"
             >
